@@ -279,11 +279,6 @@
 			$("#lbt_next", options.container_lightbox).css('display', 'block');
 		}
 		
-		if($totalImages <= options.qtd_pagination){
-			$("#lbt_previous", options.container_lightbox).css('display', 'none');
-			$("#lbt_next", options.container_lightbox).css('display', 'none');
-		}
-		
 	}
 	
 	function OpenViewer(obj){
@@ -293,7 +288,7 @@
 		MountThumbs(obj, "#lbt-thumbnails");		
 		ToLeft();
 		$("body").addClass("lbr-ToFixed");
-		
+		UpdateArrows();
 	}
 	
 	function ToLeft(){
@@ -564,17 +559,28 @@
 			
 			if($lbt_images.eq($i).find(options.captions_selector).length){
 				
+				console.log('1');
+				
 				$("#lbt-lightbox-caption", options.container_lightbox).text($lbt_images.eq($i).find(options.captions_selector).text());
 				
 			}else if($lbt_images.eq($i).next(options.captions_selector).length){
+				
+				console.log('2');
 				
 				$("#lbt-lightbox-caption", options.container_lightbox).text($lbt_images.eq($i).next(options.captions_selector).text());
 				
 			}else if($lbt_images.eq($i).parent().find(options.captions_selector).length){
 				
+				console.log('4');
+				
 				$("#lbt-lightbox-caption", options.container_lightbox).text($lbt_images.eq($i).parent().find(options.captions_selector).text());
 				
-			}			
+			}else{
+				
+				console.log('3');
+				
+			}
+			
 			
 		}
 		
@@ -879,15 +885,20 @@
 		$final = Math.min(($totalImages - 1), (Number.isInteger($f = ((Math.floor($(obj).index(options.custom_children)) + (options.qtd_pagination / 2)))) ? ($f - 1) : $f ) );
 		
 		
+		
+		
 		if($start == 0){
 			
-			$final = Math.min((options.qtd_pagination - 1), $totalImages);
+			$final = Math.min((options.qtd_pagination - 1), ($totalImages - 1));
 			
 		}else if($final == ($totalImages -1)){
 			
 			$start = Math.max(0, ($totalImages - options.qtd_pagination));
 			
 		}
+		
+		console.log($start);
+		console.log($final);
 		
 		for (var i = $start; i <= $final; i++) {
 		   
