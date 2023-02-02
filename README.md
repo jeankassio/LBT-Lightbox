@@ -71,6 +71,27 @@ And the result will be:
 
 ![](https://i.imgur.com/OW6iYoY.png)
 
+## Dynamically inserted content
+
+If you insert content dynamically after calling the plugin, just call the "update" method.
+
+```
+$instance = $('#gallery').lbtLightBox({
+    qtd_pagination: 6,
+    pagination_width: "160px",
+    pagination_height: "160px",
+    custom_children: ".box img",
+    captions: true,
+    captions_selector: ".caption p",
+});
+
+~ some content ~
+
+$instance.update();
+
+```
+
+
 ## Copyright and license
 
 Code released under the [MIT license](https://github.com/jeankassio/LBT-Lightbox/blob/main/LICENSE).
