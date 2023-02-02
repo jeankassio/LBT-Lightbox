@@ -88,9 +88,15 @@ $instance = $('#gallery').lbtLightBox({
 ~ some content ~
 
 $instance.update();
-
 ```
 
+## Preloading images that will be previewed in Lightbox
+
+```
+$instance = $('#gallery').lbtLightBox();
+
+$instance.preload();
+```
 
 ## Copyright and license
 
