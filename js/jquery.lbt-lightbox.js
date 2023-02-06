@@ -11,7 +11,7 @@
  *
  * @preserve
  */
- 
+
 (function($){
   $.fn.lbtLightBox = function(options){
 	
@@ -40,6 +40,22 @@
 	let pictureInpicture;
 	let fullscreenMode;
 	let loadingIndicator;
+	let db;
+	
+	const cyrb53 = (str, seed = 0) => {
+	  let h1 = 0xdeadbeef ^ seed,
+		h2 = 0x41c6ce57 ^ seed;
+	  for (let i = 0, ch; i < str.length; i++) {
+		ch = str.charCodeAt(i);
+		h1 = Math.imul(h1 ^ ch, 2654435761);
+		h2 = Math.imul(h2 ^ ch, 1597334677);
+	  }
+	  
+	  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+	  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+	  
+	  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+	};
 	
     let defaults = {
 		qtd_pagination: 8,
@@ -47,18 +63,60 @@
 		pagination_height: "60px",
 		captions: false,
 		captions_selector: ".caption",
-		custom_children: "img"
+		custom_children: "img",
+		db: false
 	};
-	
+	var options = $.extend(defaults, options);
 	
     function setListeners(container, options){
-		
-		$lbt_images = $(options.custom_children, options.container_images);
-		$totalImages = $lbt_images.length;
 		
 		GetIframeVideos();
 		GetHTML5Videos();
 		
+		$lbt_images = $(options.custom_children, options.container_images);
+		$totalImages = $lbt_images.length;
+		
+		if(options.db == true){
+		
+			$version_db = 1;
+			
+			let DBconnection = indexedDB.open("lbt_lightbox", $version_db);
+
+			DBconnection.onupgradeneeded = function(e){
+			  
+				db = DBconnection.result;
+				
+				if(e.oldVersion == $version_db){
+					return;
+				}
+							
+				let _images = db.createObjectStore('images', {keyPath: 'id', autoIncrement: true});
+
+				_images.createIndex('type', 'type');
+				_images.createIndex('image', 'image');
+				_images.createIndex('created', 'created');
+				
+			};
+			
+			DBconnection.onsuccess = function() {
+				
+				db = DBconnection.result;
+			  
+				LoadBdImages($lbt_images);
+			  
+			};
+			
+			DBconnection.onerror = function(){
+				console.error("Error", DBconnection.error);
+			};
+			
+			DBconnection.onblocked = function() {
+				let db = DBconnection.result;
+				db.close();
+				alert("Database is outdated, refresh the page in previous tab.");
+			};
+
+		}
 		
 		$(document).on('click', options.lbr_id + " " + options.custom_children,  function(e){
 			
@@ -262,6 +320,8 @@
 		$lbt_images = $(options.custom_children, options.container_images);
 		$totalImages = $lbt_images.length;
 		
+		LoadImages($lbt_images);
+		
 	}
 	
 	$.fn.preload = function(){
@@ -290,6 +350,110 @@
 		var img = new Image();
 		img.src = url;
 	}
+	
+	function saveToIndexedDB(storeName, object){
+	  return new Promise(
+		function(resolve, reject) {
+
+		  var dbRequest = indexedDB.open("lbt_lightbox");
+
+		  dbRequest.onerror = function(event) {
+			reject(Error("IndexedDB database error"));
+		  };
+
+		  dbRequest.onupgradeneeded = function(event) {
+			var database    = event.target.result;
+			var objectStore = database.createObjectStore(storeName, {keyPath: "id", autoIncrement: true});
+		  };
+
+		  dbRequest.onsuccess = function(event) {
+			var database      = event.target.result;
+			var transaction   = database.transaction([storeName], 'readwrite');
+			var objectStore   = transaction.objectStore(storeName);
+			var objectRequest = objectStore.put(object); // Overwrite if exists
+
+			objectRequest.onerror = function(event) {
+			  reject(Error('Error text'));
+			};
+
+			objectRequest.onsuccess = function(event) {
+			  resolve('Data saved OK');
+			};
+		  };
+		}
+	  );
+	}
+	
+	function loadFromIndexedDB(storeName, id, obj){
+	  return new Promise(
+		function(resolve, reject) {
+		  var dbRequest = indexedDB.open("lbt_lightbox");
+
+		  dbRequest.onerror = function(event) {
+			reject(Error("Error text"));
+		  };
+
+		  dbRequest.onupgradeneeded = function(event) {
+			// Objectstore does not exist. Nothing to load
+			event.target.transaction.abort();
+			reject(Error('Not found'));
+		  };
+
+		  dbRequest.onsuccess = function(event) {
+			var database      = event.target.result;
+			var transaction   = database.transaction([storeName]);
+			var objectStore   = transaction.objectStore(storeName);
+			var object_index = objectStore.index("type");
+			var objectRequest = object_index.get(id);
+			
+			objectRequest.onerror = function(event) {
+			  reject(Error('Error text'));
+			};
+
+			objectRequest.onsuccess = function(event){
+				if (objectRequest.result){
+				  resolve(objectRequest.result);
+				}else{
+				  reject(Error('object not found'));
+				}			  
+			};
+		  };
+		}
+	  );
+	}
+	
+	function blobToBase64(blob){
+	  return new Promise((resolve, _) => {
+		const reader = new FileReader();
+		reader.onloadend = () => resolve(reader.result);
+		reader.readAsDataURL(blob);
+	  });
+	}
+	
+	function base64toBlob(base64Data, contentType){
+		
+		contentType = contentType || '';
+		var sliceSize = 1024;
+		var byteCharacters = atob(base64Data);
+		var bytesLength = byteCharacters.length;
+		var slicesCount = Math.ceil(bytesLength / sliceSize);
+		var byteArrays = new Array(slicesCount);
+
+		for (var sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
+			var begin = sliceIndex * sliceSize;
+			var end = Math.min(begin + sliceSize, bytesLength);
+
+			var bytes = new Array(end - begin);
+			for (var offset = begin, i = 0; offset < end; ++i, ++offset) {
+				bytes[i] = byteCharacters[offset].charCodeAt(0);
+			}
+			byteArrays[sliceIndex] = new Uint8Array(bytes);
+		}
+		return new Blob(byteArrays, { type: contentType });
+		
+	}
+	
+	
 	
 	function UpdateArrows(){
 		
@@ -419,7 +583,7 @@
 					$('<i/>',{"class": "fa fa-angle-right"}).attr('aria-hidden', 'true')
 				]),
 				$('<div/>',{"class": "lt-thumbnail-wrapper"}).append([
-					$('<ul/>',{"id": "lbt-headertop"}).append([						
+					$('<ul/>',{"id": "lbt-headertop"}).append([
 						$('<a/>',{"id": "lbt-close_lightbox"}).append($closebutton)
 					])
 				]),
@@ -587,28 +751,17 @@
 			
 			if($lbt_images.eq($i).find(options.captions_selector).length){
 				
-				console.log('1');
-				
 				$("#lbt-lightbox-caption", options.container_lightbox).text($lbt_images.eq($i).find(options.captions_selector).text());
 				
 			}else if($lbt_images.eq($i).next(options.captions_selector).length){
-				
-				console.log('2');
 				
 				$("#lbt-lightbox-caption", options.container_lightbox).text($lbt_images.eq($i).next(options.captions_selector).text());
 				
 			}else if($lbt_images.eq($i).parent().find(options.captions_selector).length){
 				
-				console.log('4');
-				
 				$("#lbt-lightbox-caption", options.container_lightbox).text($lbt_images.eq($i).parent().find(options.captions_selector).text());
 				
-			}else{
-				
-				console.log('3');
-				
-			}
-			
+			}			
 			
 		}
 		
@@ -925,9 +1078,6 @@
 			
 		}
 		
-		console.log($start);
-		console.log($final);
-		
 		for (var i = $start; i <= $final; i++) {
 		   
 		   $thumb = null;
@@ -962,6 +1112,20 @@
 			}
 			
 		}
+		
+	}	
+		
+	function LoadImages(imgs){
+		
+		$(imgs).each(function(i){
+			
+			if($(this).attr('src').match('^blob:https?:\/\/(?:www\.)?') == null){
+				
+				ImageTob64(this);
+				
+			}
+			
+		});
 		
 	}
 	
@@ -1045,14 +1209,60 @@
 			}
 
 			canvas.getContext('2d').drawImage(this, 0, 0, canvas.width, canvas.height);
+			
 			CB_Updater(canvas.toDataURL(), obj, thumb);
 		};
 
 	}
 	
-	function CB_Updater(dataUrl, img, thumb){
+	async function ImageTob64(obj){
 		
-		$(img, options.container_lightbox).data('lbt-thumb', dataUrl);
+		var image = new Image();
+
+		image.setAttribute('crossOrigin', 'anonymous');
+		
+		image.src = $(obj).attr('src');
+		
+		image.onload = function(){
+			
+			var canvas = document.createElement('canvas');
+			canvas.height = this.naturalHeight;
+			canvas.width = this.naturalWidth;			
+			canvas.getContext('2d').drawImage(this, 0, 0);
+			
+			CB_Updater(canvas.toDataURL(), obj, false, true);
+			
+		};
+		
+		await image.decode();
+		
+	}
+	
+	function CB_Updater(dataUrl, img, thumb, gallery = false){
+		
+		if(gallery){
+			
+			$oimage = $(img, options.container_lightbox).attr('src');
+			
+			$(img, options.container_lightbox).attr('src', dataUrl);
+			
+			$blob = ConvertToBlob(dataUrl);
+			
+			$(img, options.container_lightbox).attr('src', URL.createObjectURL($blob));
+			
+			//SaveBD($blob, $oimage);
+			
+			let _image = {
+			  type: $oimage,
+			  image: $blob,
+			  created: new Date()
+			};
+			
+			saveToIndexedDB('images', _image);
+			
+		}else{
+			$(img, options.container_lightbox).data('lbt-thumb', dataUrl);
+		}
 		
 		if(thumb){
 			
@@ -1061,8 +1271,28 @@
 		}
 		
 	};
-
-    var options = $.extend(defaults, options);
+	
+	async function LoadBdImages(imgs){
+		
+		for (var i = 0; i < $(imgs).length; i++) {
+			await loadFromIndexedDB('images', $(imgs).eq(i).attr('src')).then(function($res){
+				$(imgs).eq(i).attr('src', URL.createObjectURL($res['image']));
+			}).catch(function(error){
+			});
+		}
+		
+		LoadImages($lbt_images);
+		
+	}
+	
+	function ConvertToBlob(dataUrl){
+		
+		let contentType = dataUrl.split(";base64")[0].replace('data:', '');		
+		
+		return base64toBlob(dataUrl.split(",")[1], contentType);
+		
+	}
+	
     return this.each(function(i){
 		
 		$id = "#" + "lbt-lightbox_" + (Math.floor(Math.random() * 999) + i);
