@@ -100,7 +100,7 @@ $instance.preload();
 
 ## IndexedDB Support
 
-Or, if you prefer, instead of using image preloading, you can count on IndexedDB client-side database support, which will save all images in the database before they are viewed.
+Or, if you prefer, instead of using image preloading, you can use the IndexedDB client-side database support, which will save all images in the database before they are viewed.
 
 To do this, just pass the "bd" parameter as "true"
 
