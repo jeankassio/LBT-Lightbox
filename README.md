@@ -98,6 +98,18 @@ $instance = $('#gallery').lbtLightBox();
 $instance.preload();
 ```
 
+## IndexedDB Support
+
+Or, if you prefer, instead of using image preloading, you can count on IndexedDB client-side database support, which will save all images in the database before they are viewed.
+
+To do this, just pass the "bd" parameter as "true"
+
+```
+$instance = $('#gallery').lbtLightBox({
+    db: true
+});
+```
+
 ## Copyright and license
 
 Code released under the [MIT license](https://github.com/jeankassio/LBT-Lightbox/blob/main/LICENSE).
