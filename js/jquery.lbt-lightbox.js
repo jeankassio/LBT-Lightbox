@@ -1,9 +1,9 @@
 /*!
- * LBT Lightbox v0.9.1
+ * LBT Lightbox v1.0.0
  * by Jean Kássio
  *
  * More info:
- * https://LBT-Lightbox.jeankassio.dev
+ * https://jeankassio.dev
  *
  * Copyright Jean Kássio
  * Released under the MIT license
@@ -16,8 +16,16 @@
   $.fn.lbtLightBox = function(options){
 	
 	$closebutton = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M4.227 4.227a.774.774 0 0 1 1.095 0L12 10.905l6.678-6.678a.774.774 0 1 1 1.095 1.095L13.095 12l6.678 6.678a.774.774 0 1 1-1.095 1.095L12 13.095l-6.678 6.678a.774.774 0 1 1-1.095-1.095L10.905 12 4.227 5.322a.774.774 0 0 1 0-1.095Z" fill="currentColor"/></svg>';
+	$dotoptions = '<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10.001 7.8a2.2 2.2 0 1 0 0 4.402A2.2 2.2 0 0 0 10 7.8zm0-2.6A2.2 2.2 0 1 0 9.999.8a2.2 2.2 0 0 0 .002 4.4zm0 9.6a2.2 2.2 0 1 0 0 4.402 2.2 2.2 0 0 0 0-4.402z" fill="currentColor"/></svg>';
+	$odownload = '<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 9h-4V3H9v6H5l7 8zM4 19h16v2H4z" fill="currentColor"/></svg>';
+	$oforward = '<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14.4 14.249v5.228l8.4-8.028-8.4-7.886v4.78c-10.53 0-13.2 11.678-13.2 11.678 2.981-5.266 7.484-5.772 13.2-5.772z" fill="currentColor"/></svg>';
+	$osmile = '<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20zM6.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm7 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm2.16 3H4.34a6 6 0 0 0 11.32 0z" fill="currentColor"/></svg>';
+	$ostar = '<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="m10 15-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" fill="currentColor"/></svg>';
+	$ochat = '<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"/><path d="M5.763 17H20V5H4v13.385L5.763 17zm.692 2L2 22.5V4a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6.455z" fill="currentColor"/></svg>';
 	$loading = '<svg version="1.1" id="lbt-loading" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 100 100" enable-background="new 0 0 0 0" xml:space="preserve"> <path fill="#fff" d="M73,50c0-12.7-10.3-23-23-23S27,37.3,27,50 M30.9,50c0-10.5,8.5-19.1,19.1-19.1S69.1,39.5,69.1,50"> <animateTransform attributeName="transform" attributeType="XML" type="rotate" dur="0.5s" from="0 50 50" to="360 50 50" repeatCount="indefinite" /></path></svg>';
 	$btn_play = '<svg class="lbt_btn_play" width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path stroke-width="16.667" d="M100 183.333c46.024 0 83.333-37.309 83.333-83.333S146.024 16.667 100 16.667 16.667 53.976 16.667 100 53.976 183.333 100 183.333Zm-20.833-54.166 50-29.167-50-29.167v58.334ZM87.5 112.5l16.667-12.5L87.5 87.5v25Z"/></svg>';
+	
+	$oprofile = 'https://github.com/jeankassio.png';
 	
 	let $lbt_images;
 	let $totalImages;
@@ -584,6 +592,17 @@
 				]),
 				$('<div/>',{"class": "lt-thumbnail-wrapper"}).append([
 					$('<ul/>',{"id": "lbt-headertop"}).append([
+						$('<div/>',{"id": "lbt-profile_lightbox"}).append([
+								$('<img/>').attr('src', $oprofile)
+							]),
+						$('<div/>',{"id": "lbt-name_lightbox"}).text('Jean Kássio'),
+						$('<div/>',{"id": "lbt-date_lightbox"}).text('Hoje às 12:30'),
+						$('<a/>',{"id": "lbt-chat_lightbox"}).append($ochat),
+						$('<a/>',{"id": "lbt-star_lightbox"}).append($ostar),
+						$('<a/>',{"id": "lbt-smile_lightbox"}).append($osmile),
+						$('<a/>',{"id": "lbt-forward_lightbox"}).append($oforward),
+						$('<a/>',{"id": "lbt-download_lightbox"}).append($odownload),
+						$('<a/>',{"id": "lbt-dot_lightbox"}).append($dotoptions),
 						$('<a/>',{"id": "lbt-close_lightbox"}).append($closebutton)
 					])
 				]),
@@ -741,7 +760,9 @@
 			LoadHTML5Video($i);
 			
 		}else{
-				
+			
+			console.log($lbt_images.eq($i).data());
+			
 			$img = $lbt_images.eq($i).attr('src');
 			PreLoadImage($img);
 			
@@ -978,12 +999,12 @@
 	
 	function GetHTML5Videos(){
 		
-		$lbt_hvideos = $("> video", options.container_images);
+		$lbt_hvideos = $("video", options.container_images);
 		
 		$($lbt_hvideos).each(function(i){
 			
 			$(this).after([
-				$obj = $('<img/>').data('html5Video', $(this).find('source').attr('src')).data('html5type', $(this).find('source').attr('type'))
+				$obj = $('<img/>', {"class": $(this).attr('class')}).data('html5Video', $(this).find('source').attr('src')).data('html5type', $(this).find('source').attr('type'))
 			]);
 			
 			GetThumHTML5Video($(this).find('source').attr('src'), $obj, $(this).width(), $(this).height());
@@ -998,7 +1019,7 @@
 	
 	function GetIframeVideos(){
 		
-		$lbt_ivideos = $("> iframe", options.container_images);
+		$lbt_ivideos = $("iframe", options.container_images);
 		
 		$($lbt_ivideos).each(function(i){
 			
