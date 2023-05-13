@@ -3,9 +3,7 @@ LBT Lightbox - Plugin jQuery - Lightbox with captions and image pagination
 
 A jQuery plugin supporting images, Youtube videos, Vimeo videos and HTML5 videos.
 
-You can find a demo of the plugin by clicking [HERE](https://LBT-Lightbox.jeankassio.dev) (in development).
-
-Or if you prefer, you can find a demo on [CodePen.io](https://codepen.io/jeankassio/pen/xxJPPPR).
+You can find a demo of the plugin on [CodePen.io](https://codepen.io/jeankassio/pen/xxJPPPR).
 
 ## How to use
 
