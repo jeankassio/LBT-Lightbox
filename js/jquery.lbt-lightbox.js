@@ -1,5 +1,5 @@
 /*!
- * LBT Lightbox v1.0.0
+ * LBT Lightbox v1.0.7
  * by Jean Kássio
  *
  * More info:
