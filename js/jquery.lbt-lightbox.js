@@ -325,6 +325,9 @@
 	
 	$.fn.update = function(){
 		
+		GetIframeVideos();
+		GetHTML5Videos();
+		
 		$lbt_images = $(options.custom_children, options.container_images);
 		$totalImages = $lbt_images.length;
 		
