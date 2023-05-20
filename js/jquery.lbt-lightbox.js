@@ -1,5 +1,5 @@
 /*!
- * LBT Lightbox v1.0.9
+ * LBT Lightbox v1.1.2
  * by Jean Kássio
  *
  * More info:
@@ -134,16 +134,14 @@
 		
 		$(document).on('click', options.lbt_id + " #lbt-close_lightbox", function(e){
 			
-			$("body").removeClass("lbr-ToFixed");
-			$("#lbt-lightbox_imgs", options.container_lightbox).remove();
+			RemoveViewer();
 			
 		});
 		
 		$(document).keyup(function(e){
 			
 			if(e.key === "Escape"){
-				$("body").removeClass("lbr-ToFixed");
-				$("#lbt-lightbox_imgs", options.container_lightbox).remove();
+				RemoveViewer();
 			}else if(e.key === "ArrowRight"){
 				NextImage();
 			}else if(e.key === "ArrowLeft"){
@@ -322,6 +320,16 @@
 		});
 		
     }
+	
+	$.fn.OpenViewer = function(obj){
+		
+		MountViewer(obj);		
+		LoadMedia($(obj).index(options.custom_children), null);
+		MountThumbs(obj, "#lbt-thumbnails");		
+		ToLeft();
+		$("body").addClass("lbr-ToFixed");
+		UpdateArrows();
+	}
 	
 	$.fn.update = function(){
 		
@@ -580,7 +588,16 @@
 		
 	}
 	
+	function RemoveViewer(){
+		
+		$("body").removeClass("lbr-ToFixed");
+		$("#lbt-lightbox_imgs", options.container_lightbox).remove();
+		
+	}
+	
 	function MountViewer(obj){
+		
+		RemoveViewer();
 		
 		$(options.container_lightbox).append([
 			$('<div/>',{"id": "lbt-lightbox_imgs"}).append([
