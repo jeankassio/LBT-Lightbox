@@ -1,5 +1,5 @@
 /*!
- * LBT Lightbox v1.0.7
+ * LBT Lightbox v1.0.9
  * by Jean Kássio
  *
  * More info:
@@ -328,10 +328,14 @@
 		GetIframeVideos();
 		GetHTML5Videos();
 		
-		$lbt_images = $(options.custom_children, options.container_images);
-		$totalImages = $lbt_images.length;
-		
-		LoadImages($lbt_images);
+		setTimeout(function(){
+			
+			$lbt_images = $(options.custom_children, options.container_images);
+			$totalImages = $lbt_images.length;
+			
+			LoadImages($lbt_images);
+			
+		}, 500);
 		
 	}
 	
@@ -1143,9 +1147,13 @@
 		
 		$(imgs).each(function(i){
 			
-			if($(this).attr('src').match('^blob:https?:\/\/(?:www\.)?') == null){
+			if(typeof $(this).attr('src') !== 'undefined'){
 				
-				ImageTob64(this);
+				if($(this).attr('src').match('^blob:https?:\/\/(?:www\.)?') == null){
+					
+					ImageTob64(this);
+					
+				}
 				
 			}
 			
